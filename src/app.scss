@@ -1,0 +1,344 @@
+
+* {
+  box-sizing: border-box;
+  -webkit-user-select: none;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  font-family: sans-serif;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.day-list-view {
+  display: -webkit-flex;
+  -webkit-flex-direction: row-reverse;
+  -webkit-flex-wrap: wrap;
+  -webkit-justify-content: center;
+  -webkit-align-content: flex-start;
+  -webkit-align-items: flex-start;
+  width: 140vw;
+  height: 100vh;
+  overflow-y: auto;
+
+  &:empty {
+  }
+}
+
+.day {
+  width: 20vw;
+  position: relative;
+
+  &.today {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    .date {
+      background: #fff;
+    }
+
+    .entry-list-view:after {
+      background-image: -webkit-canvas(now);
+      z-index: 1;
+    }
+  }
+  & + & {
+    border-left: 1px solid #e0e0e0;
+  }
+  &:nth-child(7n+1) {
+    border-left: none !important;
+  }
+
+  &:nth-child(-n+7) .date {
+    border-top: none;
+  }
+
+  .date {
+    text-align: center;
+    font-size: 12px;
+    height: 4vh;
+    line-height: 4vh;
+    color: #333;
+    border-top: 1px solid silver;
+    border-bottom: 1px solid silver;
+    background-image: linear-gradient(#fafafa, #f7f7f7);
+  }
+}
+
+
+.entry-list-view {
+  display: -webkit-flex;
+  -webkit-flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -webkit-justify-content: flex-start;
+  -webkit-align-content: flex-start;
+  -webkit-align-items: center;
+  height: 44vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 5px;
+  background-image: -webkit-canvas(ruler);
+
+  &:before, &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  &:before {
+    transition: background-position ease-out 300ms, opacity ease-out 300ms;
+    background-position: -16px 0px;
+    opacity: 0;
+    background-repeat: no-repeat;
+    background-image: -webkit-canvas(numbers);
+    z-index: 2;
+  }
+
+  &:after {
+    transition: background-position ease-out 300ms, opacity ease-out 300ms;
+    background-repeat: no-repeat;
+    background-position: 0px 0px;
+  }
+
+  &:hover:after {
+    background-position: 16px 0px;
+    transition-delay: 1000ms;
+  }
+
+  &:hover:before {
+    background-position: 1px 0px;
+    transition-delay: 1000ms;
+    opacity: 1;
+  }
+
+  .entry + .entry {
+    border-top: 1px solid white;
+  }
+  .entry {
+    width: 100%;
+    height: 10%;
+    background-color: rgba(196, 201, 213, 0.63);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+    font-size: 10px;
+    color: #36424E;
+    overflow: hidden;
+    border-radius: 3px;
+
+    &.small {
+      position: relative;
+
+      .entry-body {
+        margin: 0 10px;
+
+        .header {
+          top: 50%;
+          margin-top: -6px;
+          position: absolute;
+        }
+
+        .description {
+          display: none;
+        }
+      }
+    }
+
+    &.tiny {
+      .entry-body {
+        display: none;
+      }
+    }
+
+
+    &.unbillable {
+      opacity: 0.5;
+    }
+
+    .entry-body {
+      margin: 10px;
+    }
+
+    // &[style^="height: 3."] {
+    //   padding: 0;
+    //   .entry-body {
+    //     display: none;
+    //   }
+    //   &:hover {
+    //     height: auto !important;
+    //     .entry-body {
+    //       display: block !important;
+    //       padding: 10px !important;
+    //     }
+    //   }
+    // }
+    // &[style^="height: 6."] .header {
+    //   margin-top: -5px;
+    // }
+    // &[style^="height: 12."] {
+    //   .entry-body {
+    //     margin-top: 5px;
+    //   }
+    //   .description {
+    //     display: none !important;
+    //   }
+    // }
+
+    .header {
+      margin-bottom: 10px;
+
+      .project {
+        color: #fff;
+        font-weight: bold;
+        padding: 2px 5px;
+        border-radius: 20px;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+      }
+
+      .minutes {
+        float: right;
+      }
+    }
+
+    .description + .description {
+      margin-top: 5px;
+    }
+
+    .description:not(:empty) {
+      background-color: white;
+      display: block;
+      float: left;
+      clear: left;
+      padding: 3px 5px 3px 15px;
+      border-radius: 10px 3px 3px 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      font-size: 10px;
+      position: relative;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+
+      &:before {
+        position: absolute;
+        content: "";
+        width: 7px;
+        height: 7px;
+        background-color: #b6b6b6;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
+        border-radius: 10px;
+        top: 50%;
+        margin-top: -3.5px;
+        left: 4px;
+      }
+      &:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+    }
+  }
+}
+
+.modal-view:not(:empty) {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 999;
+
+  & + .day-list-view {
+    -webkit-filter: blur(10px);
+  }
+
+  form {
+    width: 40%;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -20%;
+    margin-top: -150px;
+    padding: 20px;
+    z-index: 1;
+    background-color: #FFF;
+
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.1),
+      0 2px 20px rgba(0, 0, 0, 0.3);
+
+    border-radius: 3px;
+  }
+}
+
+form {
+  width: 100%;
+
+  fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .form-group.has-error {
+    .help-block {
+      color: firebrick;
+    }
+  }
+
+  .control-label {
+    text-transform: uppercase;
+    color: silver;
+    font-size: 12px;
+  }
+  .form-control {
+    padding: 5px 5px;
+    border: 1px solid #A8A8A8;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+    font-size: 16px;
+    width: 100%;
+    height: 30px;
+
+    &:focus {
+      outline: none;
+    }
+    &[type='submit'] {
+      background: linear-gradient(white, #f8f8f8);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      margin-top: 25px;
+      &:active {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) inset;
+        background: linear-gradient(#f8f8f8, white);
+      }
+    }
+    &[name='token'] {
+      text-align: center;
+    }
+  }
+
+  .form-group + .form-group,
+  fieldset + fieldset {
+    margin-top: 10px;
+  }
+
+  .help-block {
+    color: silver;
+    font-size: 12px
+  }
+}

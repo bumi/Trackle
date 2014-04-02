@@ -1,0 +1,16 @@
+{
+  "name": "Mole",
+  "main": "index.html",
+  "version": "0.0.1",
+  "single-instance": true,
+  "window": {
+    "title": "Mole",
+    "width": 766,
+    "height": 473,
+    "position": "center",
+    "toolbar": false,
+    "show": false,
+    "frame": true
+  },
+  "chromium-args": "--child-clean-exit"
+}
