@@ -1,3 +1,5 @@
 
 $ ->
-  Mole.start()
+
+
+  Mole.start nwWindow: window.nwWindow

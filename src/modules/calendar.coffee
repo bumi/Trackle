@@ -4,239 +4,450 @@ Mole.module "Calendar", (Module, App) ->
 
   # -----------------------------------------------------------------------
 
+  class EntryItemEditView extends Marionette.ItemView
+    tagName: "div"
+    className: "popover"
+
+    behaviors:
+      KeyEvents:
+        escape: -> App.layout.popover.closeDialog()
+
+    template: "entry/edit-view"
+    modelEvents:
+      destroy: -> App.layout.popover.closeDialog()
+      change: -> @model.needsSave = true
+    events:
+      "click .remove": (e) ->
+        e.preventDefault()
+        @model.destroy()
+
+    bindings:
+      "#popover-minutes": "minutes"
+      "#popover-minutes-formatted":
+        observe: 'minutes'
+        onGet: (value, options) ->
+          value = parseInt value, 10
+          prettyValue = if value >= 60 then (value / 60) else value
+          unit = switch
+            when value < 60 then "Minutes"
+            when value is 60 then "Hour"
+            when value > 60 then "Hours"
+          "#{prettyValue} #{unit}"
+
+      "#popover-description": "description"
+      "#popover-project":
+        observe: "project_id"
+        initialize: ($el) ->
+          format = (project) ->
+            return project.text unless project.id
+            """
+              <div class="jeez" style="background-color: ##{App.projects.get(project.id).get("color_hex")};"></div>
+              #{project.text}
+            """
+
+          $el.select2
+            formatResult: format
+            formatSelection: format
+            escapeMarkup: (m) -> m
+
+        destroy: ($el) ->
+          $el.select2("destroy")
+
+        selectOptions:
+          collection: ->
+            opt_labels: ["Recent Projects", "Other Projects"]
+            "Recent Projects": App.projects.recents.toJSON()
+            "Other Projects": App.projects.other.toJSON()
+
+          labelPath: "name"
+          valuePath: "id"
+
+    onRender: ->
+      @stickit()
+
+    initialize: ->
+      @model.needsSave = false
+
+    onClose: ->
+      if @model.needsSave
+        @model.save()
+      else if @model.isNew()
+        @model.destroy()
+
+  # -----------------------------------------------------------------------
+
   class Entry extends Backbone.Model
-    defaults: ->
-      formatted_description: ""
+    defaults:
+      allow_hashtags: false
+      billable: true
+
+    select: ->
+      @set selected: true
+    deselect: ->
+      @set selected: false
 
     parse: (item) -> item.entry
 
     sync: (method, model, options) ->
-      console.log arguments
-      App.freckle.entries[method] _.extend model.toJSON(), options.success
+      payload = entry: model.toJSON()
+      payload.id = payload.entry.id if method is "update" or method is "delete"
 
-  # -----------------------------------------------------------------------
+      model.trigger 'request', model, options
+      App.Authentication.freckle.entries[method] payload, (err, response, fullResponse) ->
+        if err
+          options.error.call this, response
+          Module.weekCollection.fetch cache: false
+        else
+          if method is "create"
+            model.set id: fullResponse.headers.location.match(/\d+/).pop()
+          options.success.call this, response
+
+    initialize: ->
+      @on @events
+      @set date: @collection.date
+
+    events:
+      "change:project_id": (model, project_id) ->
+        project = App.projects.get(project_id).toJSON()
+        @set
+          project: project
+          unbillable: !project.billable
 
   class EntryCollection extends Backbone.Collection
     model: Entry
+    events:
+      remove: (model) ->
+        model.once "sync", -> Module.weekCollection.fetch cache: false
+
+    addEntry: ->
+      randomProjectId = _.sample @pluck "project_id"
+      randomProjectId or= _.sample(App.projects.recents.models).id
+
+      model = @add
+        minutes: 60
+        project_id: randomProjectId
+        project: App.projects.get(randomProjectId).toJSON()
+
+      model.trigger "edit"
+
     minutes: ->
       @pluck("minutes").reduce ((a, b) -> a + b), 0
 
-  # -----------------------------------------------------------------------
+    initialize: -> @on @events
 
   class EntryItemView extends Marionette.ItemView
-    template: "entry/item-view"
     tagName: "li"
     className: ->
-      className = "entry"
-      className += if @model.get("billable") then "" else " unbillable"
-      className += if @model.get("minutes") <= 60 then " small" else ""
-      className += if @model.get("minutes") <= 30 then " tiny" else ""
-      className
+      name = "entry"
+      name += " unbillable" unless @model.get("billable")
+      name += " unsaved" if @model.isNew()
+      name += " minutes-#{@model.get("minutes")}"
+      name
 
-    events:
-      click: ->
-        console.log @model
-        # @model.destroy wait: true
-
-    attributes: ->
-      style: "height: #{(@model.get('minutes') / (60 * 8)) * 100}%;"
+    template: "entry/item-view"
     templateHelpers: =>
-      projectColor: => "##{App.projects[@model.get("project_id")].color_hex}"
+      projectColor: =>
+        "##{App.projects.get(@model.get("project_id"))?.get("color_hex")}"
       tags: =>
         if @model.get("description")
           _.uniq(@model.get("description").toLowerCase().replace(/[!#]/g, "").split(", "))
 
+    attributes: ->
+      style: "height: #{@calcHeight()};"
 
-  # -----------------------------------------------------------------------
+    calcHeight: ->
+      "#{(@model.get('minutes') / (60 * 10)) * 100}%"
+
+    modelEvents:
+      change: "render"
+      edit: "showEditView"
+
+      "change:unbillable": (model, unbillable) ->
+        @$el.toggleClass "unbillable", unbillable
+
+      "change:id": (model, id) ->
+        @$el.removeClass "unsaved"
+
+      "change:selected": (model, selected) ->
+        @$el.toggleClass "selected", selected
+
+      "change:minutes": ->
+        @$el.css height: @calcHeight()
+        @el.className = @className()
+
+    events:
+      dblclick: "showEditView"
+      click: ->
+        @model.set selected: true
+
+    showEditView: (e) ->
+      e?.stopPropagation()
+
+      if App.layout.popover.currentView
+        App.layout.popover.closeDialog()
+      else
+        popoverView = new EntryItemEditView
+          model: @model
+          target: @$el
+
+        App.layout.popover.show popoverView
+        $(document).on "click", "#calendar-region, #header-region", ->
+          App.layout.popover.closeDialog()
+          $(document).off "click", "#calendar-region, #header-region"
+
+  class EntryCompositeView extends Marionette.CompositeView
+    tagName: "ul"
+    className: ->
+      className = "day"
+      className += " today" if @model.get("date") is moment().format("YYYY-MM-DD")
+      className
+
+    itemView: EntryItemView
+    itemViewContainer: ".entries-list"
+    template: _.template """
+      <ul class="entries-list"></ul>
+      <div class="summed-hours">
+        <%= minutes() / 60 %> Hours
+      </div>
+    """
+    templateHelpers: =>
+      minutes: => @collection.minutes()
+
+    initialize: (attributes) ->
+      @collection = attributes.model.get "entries"
+
+    events:
+      dblclick: "addEntry"
+
+    addEntry: ->
+      @collection.addEntry()
 
   class Day extends Backbone.Model
-    initialize: (options) ->
-      { entries } = options
-      @set entries: new EntryCollection entries, parse: true
+    initialize: (attributes) ->
+      entries        = new EntryCollection attributes.entries, parse: true
+      entries.date   = @get "date"
+      entries.moment = @get "moment"
+      entries.on "change:selected", (entry, selected) =>
+        @trigger "entry:change:selected", entry, selected
 
-  # -----------------------------------------------------------------------
+      @set entries: entries
 
   class DayCollection extends Backbone.Collection
     model: Day
-    parse: (entries) ->
-      groupedEntries = _.groupBy entries, (item) -> item.entry.date
-      dates = Object.keys groupedEntries
+    today: -> @findWhere date: moment().format("YYYY-MM-DD")
 
-      start = moment(dates[dates.length-1]).startOf('week')
-      end   = moment().endOf('week')
-      range = moment().range start, end
-
-      days = []
-
-      range.by 'days', (moment) ->
-        formattedMoment = moment.format "YYYY-MM-DD"
-        days.unshift
-          moment: moment
-          date: formattedMoment
-          entries: groupedEntries[formattedMoment] || []
-
-      return days
-
-    sync: (method, model, options) ->
-      App.freckle.entries.search
-        people: [App.user.get("id")]
-        success: options.success
-
-  # -----------------------------------------------------------------------
-
-  class DayCompositeView extends Marionette.CompositeView
-    template: "day/composite-view"
+  class DayCollectionView extends Marionette.CollectionView
     tagName: "li"
-    className: -> "day #{if @model.get("date") is @options.today then "today" else "" }"
-    itemView: EntryItemView
-    itemViewContainer: ".entry-list-view"
-    templateHelpers: =>
-      minutes: => @collection.minutes()
-      isToday: => @model.get("date") is @options.today
+    className: "week"
+    itemView: EntryCompositeView
+    initialize: (attributes) ->
+      @collection = attributes.model.get "days"
+
+  class Week extends Backbone.Model
+    initialize: (attributes) ->
+      days = new DayCollection attributes.days
+      days.on "entry:change:selected", (entry, selected) =>
+        @trigger "entry:change:selected", entry, selected
+
+      @set days: days
+
+  class WeekCollection extends Backbone.Collection
+    model: Week
+    sync: (method, model, options) ->
+      App.Authentication.freckle.entries.list {
+        "search[people]": App.user.id
+      }, options, (err, response) ->
+        options.success.call this, response
 
     events:
-      click: ->
-        entryCollection = @model.get("entries")
+      "entry:change:selected": (entry, selected) ->
+        switch selected
+          when true  then @select entry
+          when false then @deselect()
 
-        entry = new entryCollection.model
-          date: @model.get "date"
-          allow_hashtags: false
+    initialize: ->
+      @selected = null
+      @on @events
 
-        entry.schema =
-          minutes:
-            type: "Text"
-            validators: ['required']
-          description:
-            type: "Text"
-            validators: ['required']
-          project_id:
-            type: 'Select'
-            options: _.reduce App.projects, ((memo, item) -> memo[item.id] = item.name; return memo), {}
-            validators: ['required']
+    deselect: ->
+      return unless @selected
+      @selected.set selected: false
+      @selected = null
 
-        form = new Backbone.Form model: entry
+    select: (model) ->
+      return if model is @selected
 
-        form.render()
+      if @selected?
+        @selected.set selected: false
 
-        $(document).on "keyup", (e) ->
-          if e.which is 27
-            form.$el.remove()
+      model.set selected: true
+      @selected = model
 
-        form.$el.on "submit", (e) ->
-          e.preventDefault()
-          if form.commit() is undefined
-            $(document).off "keyup"
-            entryCollection.create entry
-            setTimeout ->
-              Module.refresh()
-            , 1000
-            form.$el.parent().transit opacity: 0, -> form.$el.remove()
+    parse: (response) ->
+      moment.lang('de')
+      groupedEntries = _.groupBy response, (item) -> item.entry.date
+      dates          = Object.keys groupedEntries
 
-        $(".modal-view")
-          .css(opacity: 1)
-          .html(form.el)
+      entriesStart = moment(dates[dates.length-1]).startOf('week')
+      entriesEnd   = moment().endOf "week"
+      entriesRange = moment().range entriesStart, entriesEnd
+      weeks        = []
 
-    initialize: (@options) ->
-      @collection = @options.model.get "entries"
+      entriesRange.by "weeks", (weekStart) ->
+        weekEnd   = weekStart.clone().endOf "week"
+        weekRange = moment().range weekStart, weekEnd
+        days      = []
 
-  # -----------------------------------------------------------------------
+        weekRange.by "days", (day) ->
+          formattedMoment = day.format "YYYY-MM-DD"
+          days.push
+            moment: day
+            date: formattedMoment
+            entries: groupedEntries[formattedMoment] || []
 
-  class DayListView extends Marionette.CollectionView
-    itemView: DayCompositeView
-    el: ".day-list-view"
-    itemViewOptions:
-      today: moment().format "YYYY-MM-DD"
+        weeks.unshift
+          isoWeek: weekStart.isoWeek()
+          days: days
+
+      return weeks
+
+  class WeekCollectionView extends Marionette.CollectionView
+    tagName: "ul"
+    className: "week-list"
+    itemView: DayCollectionView
+    behaviors:
+      KeyEvents:
+        backspace: ->
+          selected = @collection.selected
+          if selected?
+            selected.destroy()
+            selected.deselect()
+        # enter: ->
+        #   selected = @collection.selected
+        #   if selected?
+        #     selected.trigger "edit"
+        #   else
+        #     currentWeek = @currentWeek()
+        #     if currentWeek?
+        #       today = currentWeek.get("days").today()
+        #       entries = today.get "entries"
+        #       entries.addEntry()
+
+    currentWeek: ->
+      @collection.at(@weekIndex) || null
+
     collectionEvents:
       sync: ->
-        Module.timeline()
 
-        setInterval ->
-          Module.timeline()
-        , 1000 * 60
+        _.delay =>
+          @drawLines()
+          App.vent.trigger "weekCollection:change:index", @collection.at 0
+        , 100
 
-  # -----------------------------------------------------------------------
+        $(window).resize _.throttle =>
+          @drawLines()
+        , 10
 
-  @timeline = =>
-    console.log "timeline:draw"
-    $el      = $(".entry-list-view")
-    elWidth  = $el.outerWidth(true)
-    elHeight = $el.height()
+    events:
+      "panelsnap:activate": (event, $target) ->
+        App.vent.trigger "weekCollection:change:index", @collection.at $target.index()
 
-    ruler       = document.getCSSCanvasContext '2d', 'ruler'  , elWidth, elHeight
-    numbers     = document.getCSSCanvasContext '2d', 'numbers', elWidth, elHeight
-    currentTime = document.getCSSCanvasContext '2d', 'now'    , elWidth, elHeight
-    index       = 10
+      click: (e) ->
+        unless $(e.target).hasClass "entry"
+          @collection.selected?.deselect()
 
-    ruler.clearRect       0, 0, elWidth, elHeight
-    numbers.clearRect     0, 0, elWidth, elHeight
-    currentTime.clearRect 0, 0, elWidth, elHeight
+    initialize: ->
+      @weekIndex = 0
 
-    minutesSinceMidnight = (new Date() - new Date().setHours(0, 0, 0, 0)) / 1000 / 60
-    # minus ten hours
-    minutesSinceMidnight -= (10 * 60)
-    # calculate height per minute
-    minuteHeight = elHeight / (8 * 60)
+    drawLines: ->
+      [elWidth, elHeight] = [@$el.width(), @$el.height()]
+      day   = document.getCSSCanvasContext  '2d', 'day' , elWidth, elHeight
+      week  = document.getCSSCanvasContext  '2d', 'week', elWidth, elHeight
+      today = document.getCSSCanvasContext  '2d', 'now' , elWidth, elHeight
 
-    now = minuteHeight * minutesSinceMidnight
-    now = Math.round now
-    now += 0.5
+      day.clearRect   0, 0, elWidth, elHeight
+      week.clearRect  0, 0, elWidth, elHeight
+      today.clearRect 0, 0, elWidth, elHeight
+      index = 10
 
-    currentTime.beginPath()
-    currentTime.strokeStyle = "#CD6B69"
-    currentTime.moveTo 40, now
-    currentTime.lineTo elWidth - 1, now
-    currentTime.stroke()
+      minutesSinceMidnight = (new Date() - new Date().setHours(0, 0, 0, 0)) / 1000 / 60
+      # minus nine hours
+      minutesSinceMidnight -= (9 * 60)
+      # calculate height per minute
+      minuteHeight = elHeight / (10 * 60)
 
-    currentTime.beginPath()
-    currentTime.fillStyle = "#CD6B69"
-    currentTime.moveTo 0, now
-    currentTime.arc 40, now, 4, 0, Math.PI * 2, true
-    currentTime.fill()
+      hourNumberingCenter = window.innerWidth / 10 / 2
 
-    currentTime.font = '10px Droid Sans'
-    currentTime.textAlign = 'left'
-    currentTime.textBaseline = 'middle'
-    currentTime.fillStyle = "#CD6B69"
-    currentTime.fillText moment().format("HH:mm"), 5, now
+      now = minuteHeight * minutesSinceMidnight
+      now = Math.round now
+      now += 0.5
 
-    for y in [5..elHeight] by (elHeight / 8) when y isnt 5
-      index++
-      continue if index is 18
+      today.beginPath()
+      today.strokeStyle = "#FB1500"
+      today.moveTo 0, now
+      today.lineTo elWidth, now
+      today.stroke()
 
-      # round down and add a half-pixel
-      # for sharp lines (fuck canvas)
-      y = Math.round y
-      y += 0.5
+      today.beginPath()
+      today.fillStyle = "#FB1500"
+      today.moveTo 3, now
+      today.arc $(".day").width() + 2, now, 2, 0, Math.PI * 2, true
+      today.arc 2, now, 2, 0, Math.PI * 2, true
+      today.fill()
 
-      ruler.beginPath()
-      ruler.strokeStyle = "#e0e0e0"
-      ruler.moveTo 0, y
-      ruler.lineTo elWidth - 1, y
-      ruler.stroke()
+      for y in [0..elHeight] by (elHeight / 10)
 
-      numbers.beginPath()
-      numbers.fillStyle = "#CD6B69"
-      numbers.arc 10, y + 0.5, 8, 0, Math.PI * 2, true
-      numbers.fill()
+        y += (elHeight / 10)
+        y = Math.round y
+        y += 0.5
 
-      numbers.font = '8px Droid Sans'
-      numbers.textAlign = 'center'
-      numbers.textBaseline = 'middle'
-      numbers.fillStyle = "white"
-      numbers.fillText index, 9.5, y + 1
+        # strong line
+        day.beginPath()
+        day.strokeStyle = "#d7dde8"
+        day.moveTo 0, y
+        day.lineTo elWidth - 1, y
+        day.stroke()
 
-  @refresh = =>
-    App.freckle._cache.store.clear()
-    @dayCollection.fetch()
+        # dashed line
+        day.beginPath()
+        day.setLineDash [1, 2]
+        day.strokeStyle = "#d7dde8"
+        day.moveTo 0, Math.round(y - (elHeight / 10) / 2) + 0.5
+        day.lineTo elWidth - 1, Math.round(y - (elHeight / 10) / 2) + 0.5
+        day.stroke()
+
+        day.setLineDash [0, 0]
+
+        if index < 19
+          week.font = '10px sans-serif'
+          week.textAlign = 'center'
+          week.textBaseline = 'middle'
+          week.fillStyle = "#858a92"
+          week.fillText "#{index}:00", hourNumberingCenter, y
+
+        index++
+
+      week.fillStyle = "#FFFFFF"
+      # cheap outline above and below
+      week.fillText moment().format("HH:mm"), hourNumberingCenter, now - 1
+      week.fillText moment().format("HH:mm"), hourNumberingCenter, now + 1
+
+      week.fillStyle = "#FB1500"
+      week.fillText moment().format("HH:mm"), hourNumberingCenter, now
 
   @addInitializer =>
-    moment.lang('de')
+    @weekCollection     = new WeekCollection()
+    @weekCollectionView = new WeekCollectionView
+      collection: @weekCollection
+    App.layout.calendar.show @weekCollectionView
 
-    @dayCollection = new DayCollection
-    @dayListView = new DayListView collection: @dayCollection
+    @weekCollection.set [
+      { days: [{}, {}, {}, {}, {}, {}, {}] }
+    ]
+    @weekCollection.trigger "sync"
 
-    $(window).resize _.debounce ->
-      Module.timeline()
-    , 300
+    callback = _.after 2, =>
+      @weekCollection.fetch cache: false
 
-    @dayCollection.fetch()
+    App.user.once     'sync', callback
+    App.projects.once 'sync', callback

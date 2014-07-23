@@ -1,18 +1,17 @@
-<div class="entry-body">
+<div class='project'>
 
-  <div class="header">
-    <span class='project' style="background-color:{{ m.projectColor() }};">
-      {{ m.project && m.project.name }}
-    </span>
-
-    <span class='minutes'>
-      {{ m.minutes / 60 }}
-    </span>
-  </div>
-
-  <% var tags = m.tags() %>
-  <% for(var tag in tags) { %>
-      <div class='description'>{{ tags[tag] }}</div>
-  <% } %>
+  <div class="project-color" style="background-color: {{ m.projectColor() }};"></div>
+  <div class="project-name">{{ m.project && m.project.name }}</div>
 
 </div>
+
+<% if (m.minutes > 60) { %>
+  <% var tags = m.tags() %>
+  <ul class="tag-list">
+    <% for (var tag in tags) { %>
+        <li class='tag'>{{ tags[tag] }}</li>
+    <% } %>
+  </ul>
+<% } %>
+
+<div class="drag-border"></div>
