@@ -176,6 +176,13 @@ Mole.module "Calendar", (Module, App) ->
         @el.className = @className()
 
     events:
+      previewFromDrag: (_, previewFromDrag) ->
+        @model.set minutes: previewFromDrag.minutes
+
+      updateFromDrag: (_, updateFromDrag) ->
+        @model.set minutes: updateFromDrag.minutes
+        @model.save()
+
       dblclick: "showEditView"
       click: ->
         @model.set selected: true
