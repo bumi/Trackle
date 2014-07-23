@@ -73,6 +73,7 @@ class Freckle
               request[requestCargo] payload
 
               request.end (response) ->
+                console.log requestMethod, payload, url
                 storage.set "#{storageKey}:response", response.body
                 storage.set "#{storageKey}:timestamp", Date.now()
 
