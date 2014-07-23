@@ -180,7 +180,7 @@ if ( typeof Object.create !== 'function' ) {
         childNumber = Math.round(offset / self.scrollInterval);
       }
 
-      childNumber = Math.max(0, Math.min(childNumber, panelCount));
+      childNumber = Math.max(0, Math.min(childNumber, panelCount - 1));
 
       var $target = self.getPanel(':eq(' + childNumber + ')');
 
