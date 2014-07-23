@@ -29,7 +29,7 @@ $ ->
       remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      if minutes > minimumMinutes
+      if minimumMinutes < minutes <= 480
         $draggedElement.trigger "previewFromDrag", minutes: minutes
 
     $weekList.on "mouseup", (mouseupEvent) ->
@@ -41,7 +41,7 @@ $ ->
       remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      if minutes > minimumMinutes
+      if minimumMinutes < minutes <= 480
         $draggedElement.trigger "updateFromDrag", minutes: minutes
 
       $weekList.off "mousemove"

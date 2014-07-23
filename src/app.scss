@@ -277,6 +277,10 @@ h1, h2, h3, h4, h5, h6 {
             display: none;
           }
         }
+
+        .drag-border {
+          cursor: s-resize;
+        }
       }
 
       &.minutes-30 {
@@ -294,6 +298,12 @@ h1, h2, h3, h4, h5, h6 {
       &.minutes-60 {
         .project {
           height: 100%;
+        }
+      }
+
+      &.minutes-480 {
+        .drag-border {
+          cursor: n-resize;
         }
       }
 
