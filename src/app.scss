@@ -264,6 +264,9 @@ h1, h2, h3, h4, h5, h6 {
         height: 5px;
         cursor: ns-resize;
         z-index: 1;
+        &:hover {
+          background-color: #AFC0D1;
+        }
       }
 
       &.minutes-15 {
