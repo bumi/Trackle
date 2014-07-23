@@ -86,10 +86,13 @@ module.exports = (grunt) ->
             "vendor/jquery.transit.min.js"
             "vendor/underscore-min.js"
             "vendor/backbone-min.js"
-            "vendor/backbone-forms.js"
+            "vendor/backbone.stickit.js"
             "vendor/backbone.marionette.min.js"
             "vendor/moment-with-langs.min.js"
             "vendor/moment-range.js"
+            "vendor/drop.js"
+            "vendor/select2.js"
+            "vendor/jquery.panelSnap.js"
           ]
 
   # -----------------------------------------------------------------
