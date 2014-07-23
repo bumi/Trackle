@@ -9,6 +9,8 @@ $ ->
 
   $weekList = $(".week-list")
 
+  minimumMinutes = 15
+
   $weekList.on "mousedown", ".drag-border", (mousedownEvent) ->
     initialMouseX = mousedownEvent.screenX
     initialMouseY = mousedownEvent.screenY
@@ -23,22 +25,24 @@ $ ->
       currentMouseY = mousemoveEvent.screenY
       deltaY = (currentMouseY - initialMouseY)
 
-      minutes = ((initialHeight + deltaY) / stepHeightPx) * 15
-      remainder = minutes % 15
+      minutes = ((initialHeight + deltaY) / stepHeightPx) * minimumMinutes
+      remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      $draggedElement.trigger "previewFromDrag", minutes: minutes
+      if minutes > minimumMinutes
+        $draggedElement.trigger "previewFromDrag", minutes: minutes
 
     $weekList.on "mouseup", (mouseupEvent) ->
       finalMouseX = mouseupEvent.screenX
       finalMouseY = mouseupEvent.screenY
 
-      minutes = ($draggedElement.height() / stepHeightPx) * 15
+      minutes = ($draggedElement.height() / stepHeightPx) * minimumMinutes
 
-      remainder = minutes % 15
+      remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      $draggedElement.trigger "updateFromDrag", minutes: minutes
+      if minutes > minimumMinutes
+        $draggedElement.trigger "updateFromDrag", minutes: minutes
 
       $weekList.off "mousemove"
       $weekList.off "mouseup"
