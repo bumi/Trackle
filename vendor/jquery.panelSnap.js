@@ -451,9 +451,6 @@ if ( typeof Object.create !== 'function' ) {
 
           pluginInstance = Object.create(pluginObject).init(options, this);
           $.data(this, storageName, pluginInstance);
-        } else {
-          $.error('Plugin is already initialized for this object.');
-          return;
         }
       } else if(!pluginInstance) {
         $.error('Plugin is not initialized for this object yet.');

@@ -5,8 +5,6 @@ $ ->
 
   $weekList = $(".week-list")
 
-  $weekList.panelSnap
-    panelSelector: '.week'
 
   $weekList.on "mousedown", ".drag-border", (mousedownEvent) ->
     initialMouseX = mousedownEvent.screenX

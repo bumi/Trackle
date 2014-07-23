@@ -349,6 +349,8 @@ Mole.module "Calendar", (Module, App) ->
         _.delay =>
           @drawLines()
           App.vent.trigger "weekCollection:change:index", @collection.at 0
+          @$el.panelSnap panelSelector: '.week'
+
         , 100
 
         $(window).resize _.throttle =>
