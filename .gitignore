@@ -1,0 +1,5 @@
+.DS_Store
+Mole.app/*
+Mole.sketch/*
+node_modules/*
+.sass-cache/*
