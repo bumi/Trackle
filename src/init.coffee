@@ -34,12 +34,10 @@ $ ->
       finalMouseY = mouseupEvent.screenY
 
       minutes = ($draggedElement.height() / stepHeightPx) * 15
-      console.log minutes
 
       remainder = minutes % 15
       minutes = minutes - remainder
 
-      console.log minutes
       $draggedElement.trigger "updateFromDrag", minutes: minutes
 
       $weekList.off "mousemove"
