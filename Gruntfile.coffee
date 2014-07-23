@@ -93,6 +93,7 @@ module.exports = (grunt) ->
             "vendor/drop.js"
             "vendor/select2.js"
             "vendor/jquery.panelSnap.js"
+            "vendor/raygun.min.js"
           ]
 
   # -----------------------------------------------------------------

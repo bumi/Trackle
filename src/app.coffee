@@ -161,6 +161,7 @@ Mole.addInitializer (@options) ->
   @projects = new ProjectCollection()
 
   @user.on "sync", =>
+    Raygun.setUser @user.get("email")
     if @user.get("email") is "philipp@railslove.com"
       @options.dtWindow = @options.nwWindow.showDevTools()
 

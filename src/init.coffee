@@ -3,8 +3,11 @@ $ ->
 
   Mole.start nwWindow: window.nwWindow
 
-  $weekList = $(".week-list")
+  Raygun.init('qpf4QU6c4uq/tYwvoegH8A==',
+    ignoreAjaxAbort: true
+  ).attach()
 
+  $weekList = $(".week-list")
 
   $weekList.on "mousedown", ".drag-border", (mousedownEvent) ->
     initialMouseX = mousedownEvent.screenX
