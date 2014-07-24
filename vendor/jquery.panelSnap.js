@@ -287,6 +287,7 @@ if ( typeof Object.create !== 'function' ) {
     },
 
     snapToPanel: function($target) {
+      if ($target.length == 0) { return };
 
       var self = this;
 
