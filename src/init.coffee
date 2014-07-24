@@ -10,6 +10,7 @@ $ ->
   $weekList = $(".week-list")
 
   minimumMinutes = 15
+  maximumMinutes = 480
 
   $weekList.on "mousedown", ".drag-border", (mousedownEvent) ->
     initialMouseX = mousedownEvent.screenX
@@ -29,7 +30,7 @@ $ ->
       remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      if minimumMinutes < minutes <= 480
+      if minimumMinutes < minutes <= maximumMinutes
         $draggedElement.trigger "previewFromDrag", minutes: minutes
 
     $weekList.on "mouseup", (mouseupEvent) ->
@@ -41,7 +42,7 @@ $ ->
       remainder = minutes % minimumMinutes
       minutes = minutes - remainder
 
-      if minimumMinutes < minutes <= 480
+      if minimumMinutes < minutes <= maximumMinutes
         $draggedElement.trigger "updateFromDrag", minutes: minutes
 
       $weekList.off "mousemove"
