@@ -368,6 +368,11 @@ Mole.module "Calendar", (Module, App) ->
     initialize: ->
       @weekIndex = 0
 
+    cyclicRedraw: =>
+      @drawLines()
+      setTimeout @cyclicRedraw, (60 - (new Date()).getSeconds()) * 1000 + 5
+
+
     drawLines: ->
       [elWidth, elHeight] = [@$el.width(), @$el.height()]
       day   = document.getCSSCanvasContext  '2d', 'day' , elWidth, elHeight
@@ -457,6 +462,7 @@ Mole.module "Calendar", (Module, App) ->
 
     callback = _.after 2, =>
       @weekCollection.fetch cache: false
+      @weekCollectionView.cyclicRedraw()
 
     App.user.once     'sync', callback
     App.projects.once 'sync', callback
