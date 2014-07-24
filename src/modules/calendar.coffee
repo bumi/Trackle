@@ -127,6 +127,7 @@ Mole.module "Calendar", (Module, App) ->
         minutes: 60
         project_id: randomProjectId
         project: App.projects.get(randomProjectId).toJSON()
+        time_from: moment().toISOString()
 
       model.trigger "edit"
 
