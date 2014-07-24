@@ -56,6 +56,8 @@ Mole.module "Behaviors", (Behaviors, App, Backbone, Marionette) ->
       return true if a is "INPUT" or a is "TEXTAREA"
 
     checkKey: (event) =>
+      return if @shouldIgnore()
+
       unless ~[16, 18, 91, 93, 17].indexOf event.which
         modifier = []
         modifier.push "ctrl"  if event.ctrlKey
