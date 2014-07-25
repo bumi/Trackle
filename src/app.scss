@@ -460,6 +460,32 @@ h1, h2, h3, h4, h5, h6 {
   h1 {
     text-align: center;
   }
+  .fake-input {
+    display: -webkit-flex;
+    -webkit-flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    -webkit-justify-content: flex-start;
+    -webkit-align-content: center;
+    -webkit-align-items: center;
+
+    padding: 5px 5px 4px;
+    border-radius: 2px;
+    border: 1px solid #bebebe;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+    font: inherit;
+    width: 100%;
+
+    input[type="text"] {
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      text-align: right;
+    }
+    .partial-text {
+      -webkit-flex-shrink: 0;
+    }
+  }
 }
 #entry-edit-view {
   min-width: 200px;
