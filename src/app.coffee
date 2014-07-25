@@ -1,5 +1,4 @@
 
-async = require "async"
 window.Mole = new Backbone.Marionette.Application()
 
 # -----------------------------------------------------------------------
