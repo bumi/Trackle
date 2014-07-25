@@ -37,8 +37,13 @@ module.exports = (grunt) ->
         files:
           '<%= config.dest %>/app.js': [
             'src/lib/*.coffee'
+            'src/models/*.coffee'
+            'src/collections/*.coffee'
+            'src/regions/*.coffee'
+            'src/layouts/*.coffee'
             'src/app.coffee'
             'src/modules/*.coffee'
+            'src/behaviors/*.coffee'
             'src/init.coffee'
           ]
 
