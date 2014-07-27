@@ -44,7 +44,7 @@ Mole.addInitializer (@options) ->
       if @storage.exist("window:devTools:position")
         @options.dtWindow.moveTo.apply @options.dtWindow, @storage.get("window:devTools:position")
     else
-      @tracker.event "user:logged-in", _.pick(Mole.user.toJSON(), ["email", "first_name", "last_name"])
+      @tracker.event "user:logged-in"
 
 
   @options.nwWindow.on "move", _.debounce (args...) =>
