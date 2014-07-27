@@ -16,10 +16,18 @@ Mole.addInitializer (@options) ->
   @storage  = new Storage()
   @user     = new User()
   @projects = new ProjectCollection()
+  @tracker = new Track "http://5.101.105.15/api"
+
+  unless @storage.exist("app:uuid")
+    @storage.set "app:uuid", window.uuid()
+
+  @tracker.setUser @storage.get("app:uuid")
+  @tracker.event "application:startup"
 
   @user.on "sync", =>
-    Raygun.setUser @user.get("email")
-    if @user.get("email") is "philipp@railslove.com"
+    userEmail = @user.get("email")
+    Raygun.setUser userEmail
+    if userEmail is "philipp@railslove.com"
       @options.dtWindow = @options.nwWindow.showDevTools()
 
       @options.dtWindow.on "move", _.debounce (args...) =>
@@ -35,6 +43,8 @@ Mole.addInitializer (@options) ->
 
       if @storage.exist("window:devTools:position")
         @options.dtWindow.moveTo.apply @options.dtWindow, @storage.get("window:devTools:position")
+    else
+      @tracker.event "user:logged-in", _.pick(Mole.user.toJSON(), ["email", "first_name", "last_name"])
 
 
   @options.nwWindow.on "move", _.debounce (args...) =>
@@ -45,11 +55,11 @@ Mole.addInitializer (@options) ->
     @storage.set "window:dimensions", args
   , 300
 
-  if @storage.exist("window:dimensions")
-    @options.nwWindow.resizeTo.apply @options.nwWindow, @storage.get("window:dimensions")
+  if @storage.exist "window:dimensions"
+    @options.nwWindow.resizeTo.apply @options.nwWindow, @storage.get "window:dimensions"
 
-  if @storage.exist("window:position")
-    @options.nwWindow.moveTo.apply @options.nwWindow, @storage.get("window:position")
+  if @storage.exist "window:position"
+    @options.nwWindow.moveTo.apply @options.nwWindow, @storage.get "window:position"
 
   @vent.on "api:ready", =>
     @user.fetch()
@@ -62,7 +72,7 @@ Mole.addInitializer (@options) ->
   @Calendar.start()
 
   @Calendar.weekCollection.on "sync", =>
-    entries = @storage.get("request:entries:list:response")
+    entries = @storage.get "request:entries:list:response"
     recentIds = _.chain(entries).pluck("entry").pluck("project_id").uniq().value()
 
     [other, recents] = _.partition @projects.models, (project) -> !~recentIds.indexOf(project.id)

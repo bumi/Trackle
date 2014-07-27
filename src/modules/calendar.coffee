@@ -20,6 +20,7 @@ Mole.module "Calendar", (Module, App) ->
       "click .remove": (e) ->
         e.preventDefault()
         @model.destroy()
+        App.tracker.event "entry:remove:via-click"
 
     bindings:
       "#popover-minutes": "minutes"
@@ -129,6 +130,7 @@ Mole.module "Calendar", (Module, App) ->
         project: App.projects.get(randomProjectId).toJSON()
 
       model.trigger "edit"
+      App.tracker.event "entry:add"
 
     minutes: ->
       @pluck("minutes").reduce ((a, b) -> a + b), 0
@@ -182,6 +184,7 @@ Mole.module "Calendar", (Module, App) ->
       updateFromDrag: (_, updateFromDrag) ->
         @model.set minutes: updateFromDrag.minutes
         @model.save()
+        App.tracker.event "entry:resized"
 
       dblclick: "showEditView"
       click: ->
@@ -201,6 +204,8 @@ Mole.module "Calendar", (Module, App) ->
         $(document).on "click", "#calendar-region, #header-region", ->
           App.layout.popover.closeDialog()
           $(document).off "click", "#calendar-region, #header-region"
+
+      App.tracker.event "entry:edit"
 
   class EntryCompositeView extends Marionette.CompositeView
     tagName: "ul"
@@ -329,6 +334,7 @@ Mole.module "Calendar", (Module, App) ->
           if selected?
             selected.destroy()
             selected.deselect()
+            App.tracker.event "entry:remove:via-key"
         # enter: ->
         #   selected = @collection.selected
         #   if selected?

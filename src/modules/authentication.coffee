@@ -55,6 +55,9 @@ Mole.module "Authentication", (Module, App) ->
     @freckle.on "authentication:success", (auth) =>
       @auth = App.storage.set "auth", auth
 
+    @freckle.on "authentication:error", (error) =>
+      App.tracker.event "authentication:error", error
+
     if App.storage.exist "auth"
       @auth = App.storage.get "auth"
       {token, subdomain} = @auth
