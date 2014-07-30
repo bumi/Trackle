@@ -131,6 +131,7 @@ Mole.module "Calendar", (Module, App) ->
         minutes: 60
         project_id: randomProjectId
         project: App.projects.get(randomProjectId).toJSON()
+        allow_hashtags: false
 
       model.trigger "edit"
       App.tracker.event "entry:add"
