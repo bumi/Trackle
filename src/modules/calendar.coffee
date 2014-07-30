@@ -189,15 +189,15 @@ Mole.module "Calendar", (Module, App) ->
         @model.save()
         App.tracker.event "entry:resized"
 
-      dblclick: ->
-        App.tracker.event "entry:edit"
-        @showEditView()
+      dblclick: "showEditView"
 
       click: ->
         @model.set selected: true
 
     showEditView: (e) ->
       e?.stopPropagation()
+
+      App.tracker.event "entry:edit" unless @model.isNew()
 
       if App.layout.popover.currentView
         App.layout.popover.closeDialog()
