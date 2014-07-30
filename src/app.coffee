@@ -18,15 +18,11 @@ Mole.addInitializer (@options) ->
   @projects = new ProjectCollection()
   @tracker = new Track "http://5.101.105.15/api"
 
-  unless @storage.exist("app:uuid")
-    @storage.set "app:uuid", window.uuid()
-
-  @tracker.setUser @storage.get("app:uuid")
-  @tracker.event "application:startup"
 
   @user.on "sync", =>
     userEmail = @user.get("email")
     Raygun.setUser userEmail
+
     if userEmail is "philipp@railslove.com"
       @options.dtWindow = @options.nwWindow.showDevTools()
 
@@ -43,9 +39,13 @@ Mole.addInitializer (@options) ->
 
       if @storage.exist("window:devTools:position")
         @options.dtWindow.moveTo.apply @options.dtWindow, @storage.get("window:devTools:position")
-    else
-      @tracker.event "user:logged-in"
 
+    else
+      unless @storage.exist("app:uuid")
+        @storage.set "app:uuid", require('crypto').createHash('md5').update(userEmail).digest("hex")
+
+      @tracker.setUser @storage.get("app:uuid")
+      @tracker.event "application:startup"
 
   @options.nwWindow.on "move", _.debounce (args...) =>
     @storage.set "window:position", args
