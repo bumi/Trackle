@@ -124,7 +124,7 @@ class Freckle
         else
           @options.token = response.body.user.api_auth_token
           @setupResources()
-          @do "authentication:success", token: @options.token, subdomain: @options.subdomain
+          @do "authentication:success", token: @options.token, subdomain: @options.subdomain, email: user
 
   constructor: ->
     @api = require "unirest"

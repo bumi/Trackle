@@ -55,6 +55,7 @@ Mole.module "Authentication", (Module, App) ->
     @freckle.on "authentication:success", (auth) =>
       @auth = App.storage.set "auth", auth
       App.tracker.event "authentication:success"
+      App.tracker.setUser App.hash auth.email
 
     @freckle.on "authentication:error", (error) =>
       App.tracker.event "authentication:error", error
