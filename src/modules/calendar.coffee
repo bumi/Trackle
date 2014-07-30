@@ -461,9 +461,8 @@ Mole.module "Calendar", (Module, App) ->
       collection: @weekCollection
     App.layout.calendar.show @weekCollectionView
 
-    @weekCollection.set [
-      { days: [{}, {}, {}, {}, {}, {}, {}] }
-    ]
+    collectionArray = App.storage.get("request:entries:list:response") || [{ days: [{}, {}, {}, {}, {}, {}, {}] }]
+    @weekCollection.set collectionArray, parse: App.storage.exist("request:entries:list:response")
     @weekCollection.trigger "sync"
 
     callback = _.after 2, =>
