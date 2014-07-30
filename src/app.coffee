@@ -23,6 +23,7 @@ Mole.addInitializer (@options) ->
   @user.on "sync", =>
     userEmail = @user.get("email")
     Raygun.setUser userEmail
+    @tracker.setUser @hash userEmail
 
     if userEmail is "philipp@railslove.com"
       @options.dtWindow = @options.nwWindow.showDevTools()
