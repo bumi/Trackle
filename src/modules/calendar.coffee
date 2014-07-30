@@ -76,6 +76,7 @@ Mole.module "Calendar", (Module, App) ->
         @model.save()
       else if @model.isNew()
         @model.destroy()
+        App.tracker.event "entry:remove:was-empty"
 
   # -----------------------------------------------------------------------
 
