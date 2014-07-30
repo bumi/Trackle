@@ -189,7 +189,10 @@ Mole.module "Calendar", (Module, App) ->
         @model.save()
         App.tracker.event "entry:resized"
 
-      dblclick: "showEditView"
+      dblclick: ->
+        App.tracker.event "entry:edit"
+        @showEditView()
+
       click: ->
         @model.set selected: true
 
@@ -207,8 +210,6 @@ Mole.module "Calendar", (Module, App) ->
         $(document).on "click", "#calendar-region, #header-region", ->
           App.layout.popover.closeDialog()
           $(document).off "click", "#calendar-region, #header-region"
-
-      App.tracker.event "entry:edit"
 
   class EntryCompositeView extends Marionette.CompositeView
     tagName: "div"
