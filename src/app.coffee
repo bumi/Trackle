@@ -23,6 +23,11 @@ Mole.addInitializer (@options) ->
     userEmail = @user.get("email")
     Raygun.setUser userEmail
 
+    unless @storage.exist("app:uuid")
+      @storage.set "app:uuid", require('crypto').createHash('md5').update(userEmail).digest("hex")
+
+    @tracker.setUser @storage.get("app:uuid")
+
     if userEmail is "philipp@railslove.com"
       @options.dtWindow = @options.nwWindow.showDevTools()
 
@@ -41,10 +46,6 @@ Mole.addInitializer (@options) ->
         @options.dtWindow.moveTo.apply @options.dtWindow, @storage.get("window:devTools:position")
 
     else
-      unless @storage.exist("app:uuid")
-        @storage.set "app:uuid", require('crypto').createHash('md5').update(userEmail).digest("hex")
-
-      @tracker.setUser @storage.get("app:uuid")
       @tracker.event "application:startup"
 
   @options.nwWindow.on "move", _.debounce (args...) =>
