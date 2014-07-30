@@ -58,6 +58,7 @@ Mole.module "Authentication", (Module, App) ->
 
     @freckle.on "authentication:error", (error) =>
       App.tracker.event "authentication:error", error
+      window.location.reload()
 
     if App.storage.exist "auth"
       @auth = App.storage.get "auth"
