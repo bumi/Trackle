@@ -10,7 +10,9 @@ Mole.module "Calendar", (Module, App) ->
 
     behaviors:
       KeyEvents:
-        escape: -> App.layout.popover.closeDialog()
+        escape: ->
+          App.layout.popover.closeDialog()
+          App.tracker.event "entry:close:via-key"
 
     template: "entry/edit-view"
     modelEvents:
