@@ -208,7 +208,7 @@ Mole.module "Calendar", (Module, App) ->
       App.tracker.event "entry:edit"
 
   class EntryCompositeView extends Marionette.CompositeView
-    tagName: "ul"
+    tagName: "div"
     className: ->
       className = "day"
       className += " today" if @model.get("date") is moment().format("YYYY-MM-DD")
