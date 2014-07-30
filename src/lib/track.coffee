@@ -3,7 +3,7 @@ class Track
     data["timestamp"] = moment().format()
     data["user"] = @user
 
-    console.log "track#{resource}"
+    console.log "track#{resource}/#{data.key}"
 
     @unirest.post @serviceUrl + resource
       .headers "Content-Type": 'application/json'
