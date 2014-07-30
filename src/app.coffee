@@ -18,14 +18,15 @@ Mole.addInitializer (@options) ->
   @projects = new ProjectCollection()
   @tracker = new Track "http://5.101.105.15/api"
 
+  @hash = (string) ->
+    require('crypto').createHash('md5').update(string).digest("hex")
 
   @user.on "sync", =>
     userEmail = @user.get("email")
     Raygun.setUser userEmail
 
     unless @storage.exist("app:uuid")
-      @storage.set "app:uuid", require('crypto').createHash('md5').update(userEmail).digest("hex")
-
+      @storage.set "app:uuid", @hash userEmail
     @tracker.setUser @storage.get("app:uuid")
 
     if userEmail is "philipp@railslove.com"
