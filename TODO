@@ -1,0 +1,16 @@
+TODO
+
+- implement menu items and keyboard shortcuts via node-webkit
+- seperate methods from drawLines method
+- rip out panelSnap, maybe only render one week at a time
+- sort recent projects by frequency of occurence
+- integrate dragging code
+- clean up Calendar Module
+- monthly calendar overview
+- move to atom-shell
+  - quick-entry window/timer from menubar icon
+  - custom window chrome
+- implement local cache db instead of localstorage
+  - nedb fork https://github.com/brumm/nedb
+  - app only communicates with db which updates itself from api
+- drag and drop entries between days
