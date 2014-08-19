@@ -7,7 +7,7 @@ $ ->
     ignoreAjaxAbort: true
   ).attach()
 
-  $weekList = $(".week-list")
+  $weekList = $(".weeks-list")
 
   minimumMinutes = 15
   maximumMinutes = 480

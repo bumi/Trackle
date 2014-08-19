@@ -213,7 +213,7 @@ Mole.module "Calendar", (Module, App) ->
           $(document).off "click", "#calendar-region, #header-region"
 
   class EntryCompositeView extends Marionette.CompositeView
-    tagName: "div"
+    tagName: "li"
     className: ->
       className = "day"
       className += " today" if @model.get("date") is moment().format("YYYY-MM-DD")
@@ -253,10 +253,14 @@ Mole.module "Calendar", (Module, App) ->
     model: Day
     today: -> @findWhere date: moment().format("YYYY-MM-DD")
 
-  class DayCollectionView extends Marionette.CollectionView
+  class DayCompositeView extends Marionette.CompositeView
     tagName: "li"
     className: "week"
     itemView: EntryCompositeView
+    itemViewContainer: ".days-list"
+    template: _.template """
+      <ul class="days-list"></ul>
+    """
     initialize: (attributes) ->
       @collection = attributes.model.get "days"
 
@@ -330,8 +334,8 @@ Mole.module "Calendar", (Module, App) ->
 
   class WeekCollectionView extends Marionette.CollectionView
     tagName: "ul"
-    className: "week-list"
-    itemView: DayCollectionView
+    className: "weeks-list"
+    itemView: DayCompositeView
     behaviors:
       KeyEvents:
         backspace: ->

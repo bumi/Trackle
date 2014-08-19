@@ -166,16 +166,18 @@ h1, h2, h3, h4, h5, h6 {
   top: 50px;
   bottom: 0;
 
-  .week-list {
+  .weeks-list {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
     position: relative;
   }
 
-  // .week + .week {
-  // }
   .week {
+    height: 100%;
+  }
+
+  .days-list {
     height: 100%;
     display: -webkit-flex;
     -webkit-flex-direction: row;
