@@ -1,0 +1,63 @@
+init.coffee
+  Mole.start nwWindow: window.nwWindow
+
+app.coffee
+  setup resources
+  start modules (Header, Calendar)
+  start module Authentication
+
+calendar.coffee
+  initialize resources with either cached api response or empty objects
+  setup listener which runs weekCollection fetch after BOTH user and projects are available
+
+authentication.coffee
+  if previous auth exists
+    initialize freckle api with token and subdomain
+  else
+    prompt for freckle details
+    initialize freckle api with subdomain
+    authenticate with email and password (gets token)
+    freckle triggers "ready"
+    Authentication module trigger "api:ready" on App.vent
+
+app.coffee
+  fetch users
+  fetch projects
+
+calendar.coffee
+  fetch weekCollection after BOTH user and projects are sync'd
+    needs user.id, which is why we need to wait
+
+  WeekCollection#parse
+    group entries by date
+    construct moment.range with
+      start: first day of week of last entries date
+      end: last day of current week
+
+    iterate over range in units of week
+      iterate over week range in units of days
+        construct weeks array
+
+    returns weeks = [
+      isoWeek: 12
+      days: [
+        moment: moment
+        date: "2014-08-19"
+        entries: [{}]
+      ]
+    ]
+
+    WeekCollection
+      WeekModel
+        days: DayCollection
+          Day
+            entries: EntryCollection
+              Entry
+
+    WeekCollectionView
+      className: "weeks-list"
+      itemView: DayCompositeView
+        className: "week"
+        itemView: EntryCompositeView
+          className: "day"
+          itemView: EntryItemView
