@@ -25,7 +25,7 @@ Mole.addInitializer (@options) ->
     Raygun.setUser userEmail
     @tracker.setUser @hash userEmail
 
-    if userEmail is "philipp@railslove.com"
+    if userEmail in ["philipp@railslove.com", "peter@railslove.com"]
       @options.dtWindow = @options.nwWindow.showDevTools()
 
       @options.dtWindow.on "move", _.debounce (args...) =>
@@ -71,7 +71,7 @@ Mole.addInitializer (@options) ->
 
   @Calendar.weekCollection.on "sync", =>
     entries = @storage.get "request:entries:list:response"
-    recentIds = _.chain(entries).pluck("entry").pluck("project_id").uniq().value()
+    recentIds = _.chain(entries).pluck("entry").pluck("project_id").groupBy().sortBy((project_id) -> project_id.length).map((element) -> _.first(element) ).value();
 
     [other, recents] = _.partition @projects.models, (project) -> !~recentIds.indexOf(project.id)
 
