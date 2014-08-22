@@ -71,11 +71,16 @@ Mole.addInitializer (@options) ->
 
   @Calendar.weekCollection.on "sync", =>
     entries = @storage.get "request:entries:list:response"
-    recentIds = _.chain(entries).pluck("entry").pluck("project_id").groupBy().sortBy((project_id) -> project_id.length).map((element) -> _.first(element) ).value();
+    recentIds = _.chain(entries).pluck("entry").pluck("project_id").groupBy().sortBy((project_id) -> -project_id.length).map((element) -> _.first(element)).value()
 
     [other, recents] = _.partition @projects.models, (project) -> !~recentIds.indexOf(project.id)
 
     @projects.recents = new ProjectCollection recents
     @projects.other   = new ProjectCollection other
+
+    #sort recent projects according to occurence
+    @projects.recents.map((project) -> project.set(position: _.indexOf(recentIds, project.id)))
+    @projects.recents.comparator = 'position'
+    @projects.recents.sort()
 
   @Authentication.start()
