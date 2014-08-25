@@ -43,9 +43,9 @@ Mole.module "Calendar", (Module, App) ->
         initialize: ($el) ->
           format = (project) ->
             return project.text unless project.id
-            """
+            _.template """
               <div class="jeez" style="background-color: ##{App.projects.get(project.id).get("color_hex")};"></div>
-              #{project.text}
+              <span class="<% if(!#{App.projects.get(project.id).get("billable")}){ %> unbillable <% } %>"> #{project.text} </span>
             """
 
           $el.select2
