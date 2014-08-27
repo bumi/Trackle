@@ -368,7 +368,7 @@ Mole.module "Calendar", (Module, App) ->
 
         , 100
 
-        $(window).resize _.throttle =>
+        App.options.nwWindow.on "resize", _.throttle =>
           @drawLines()
         , 10
 
