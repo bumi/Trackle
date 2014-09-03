@@ -17,6 +17,7 @@ Mole.addInitializer (@options) ->
   @user     = new User()
   @projects = new ProjectCollection()
   @tracker = new Track "http://5.101.105.15/api"
+  @config = require './dist/config.json' 
 
   @hash = (string) -> window.md5 string
 
