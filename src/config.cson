@@ -1,0 +1,4 @@
+{
+  day_starts_at: 9 # The hour (am) you start your work day 
+  hours_per_day: 8 # The number of hours, a day should consist of 
+}

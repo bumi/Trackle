@@ -12,8 +12,12 @@ module.exports = (grunt) ->
         files: ['src/**/*.coffee']
         tasks: ['coffee:compile']
 
+      cson:
+        files: ['src/**/*.cson']
+        tasks: ['cson:compile']
+
       static:
-        files: ['src/**/*.html']
+        files: ['src/**/*.html', 'src/config.cson']
         tasks: ['copy:static']
 
       sass:
@@ -46,6 +50,13 @@ module.exports = (grunt) ->
             'src/behaviors/*.coffee'
             'src/init.coffee'
           ]
+
+  # -----------------------------------------------------------------
+    cson:
+      glob_to_multiple:
+        src: ['src/config.cson' ]
+        dest: '<%= config.dest %>/config.json'
+        ext: '.json'
 
   # -----------------------------------------------------------------
 
@@ -100,6 +111,7 @@ module.exports = (grunt) ->
             "vendor/jquery.panelSnap.js"
             "vendor/raygun.min.js"
             "vendor/md5.js"
+            "vendor/kinetic-v5.1.0.min.js"
           ]
 
   # -----------------------------------------------------------------
@@ -113,6 +125,6 @@ module.exports = (grunt) ->
 
   # -----------------------------------------------------------------
 
-  grunt.registerTask 'startup', ['coffee:compile', 'copy:static', 'sass:compile', 'jst:compile', 'uglify:vendor']
+  grunt.registerTask 'startup', ['coffee:compile', 'cson', 'copy:static', 'sass:compile', 'jst:compile', 'uglify:vendor']
   grunt.registerTask 'dev', ['startup', 'watch']
   grunt.registerTask 'server', ['connect:server:keepalive']
