@@ -18,8 +18,7 @@ $ ->
     $draggedElement = $(this).parent()
     initialHeight = $draggedElement.height()
 
-    stepHeightPx = Math.floor ($weekList.height() / 40)
-    stepHeightPc = 2.5
+    stepHeightPx = Math.floor ($weekList.height() / (Mole.config.hours_per_day * 4))
 
     $weekList.on "mousemove", (mousemoveEvent) ->
       currentMouseX = mousemoveEvent.screenX

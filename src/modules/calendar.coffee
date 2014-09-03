@@ -1,7 +1,6 @@
 
 Mole.module "Calendar", (Module, App) ->
   @startWithParent = false
-
   # -----------------------------------------------------------------------
 
   class EntryItemEditView extends Marionette.ItemView
@@ -162,7 +161,7 @@ Mole.module "Calendar", (Module, App) ->
       style: "height: #{@calcHeight()};"
 
     calcHeight: ->
-      "#{(@model.get('minutes') / (60 * 10)) * 100}%"
+      "#{(@model.get('minutes')  / 60 / App.config.hours_per_day) * 100}%"
 
     modelEvents:
       change: "render"
@@ -238,6 +237,18 @@ Mole.module "Calendar", (Module, App) ->
 
     addEntry: ->
       @collection.addEntry()
+    
+    modelEvents: {
+    "change": "updateSum"
+    }
+    updateSum: ->
+      'summed-hours'
+
+    collectionEvents: {
+      "add": "updateSum"
+    }
+
+
 
   class Day extends Backbone.Model
     initialize: (attributes) ->
@@ -389,32 +400,59 @@ Mole.module "Calendar", (Module, App) ->
 
 
     drawLines: ->
-      [elWidth, elHeight] = [@$el.width(), @$el.height()]
-      day   = document.getCSSCanvasContext  '2d', 'day' , elWidth, elHeight
-      week  = document.getCSSCanvasContext  '2d', 'week', elWidth, elHeight
-      today = document.getCSSCanvasContext  '2d', 'now' , elWidth, elHeight
+      [weekWidth, weekHeight] = [@$el.width(), @$el.height()]
 
-      day.clearRect   0, 0, elWidth, elHeight
-      week.clearRect  0, 0, elWidth, elHeight
-      today.clearRect 0, 0, elWidth, elHeight
-      index = 10
+      day   = document.getCSSCanvasContext  '2d', 'day' , weekWidth, weekHeight
+      week  = document.getCSSCanvasContext  '2d', 'week', weekWidth, weekHeight
+      today = document.getCSSCanvasContext  '2d', 'now' , weekWidth, weekHeight
 
-      minutesSinceMidnight = (new Date() - new Date().setHours(0, 0, 0, 0)) / 1000 / 60
-      # minus nine hours
-      minutesSinceMidnight -= (9 * 60)
-      # calculate height per minute
-      minuteHeight = elHeight / (10 * 60)
+      day.clearRect   0, 0, weekWidth, weekHeight
+      week.clearRect  0, 0, weekWidth, weekHeight
+      today.clearRect 0, 0, weekWidth, weekHeight
 
       hourNumberingCenter = window.innerWidth / 10 / 2
+      minuteHeight = weekHeight / (App.config.hours_per_day * 60)
 
-      now = minuteHeight * minutesSinceMidnight
-      now = Math.round now
-      now += 0.5
+      hourHeight = Math.round(weekHeight / App.config.hours_per_day)
 
+      hour = App.config.day_starts_at
+
+      for y in [(weekHeight*0.05)..weekHeight] by hourHeight
+
+        # strong line
+        day.beginPath()
+        day.strokeStyle = "#d7dde8"
+        day.moveTo 0, y
+        day.lineTo weekWidth - 1, y
+        day.stroke()
+
+        # dashed line
+        day.beginPath()
+        day.setLineDash [1, 2]
+        day.strokeStyle = "#d7dde8"
+        day.moveTo 0, (y - hourHeight / 2)
+        day.lineTo weekWidth - 1, (y - hourHeight / 2)
+        day.stroke()  
+
+        #reset dash
+        day.setLineDash [0, 0]
+
+        week.font = '10px sans-serif'
+        week.textAlign = 'center'
+        week.textBaseline = 'middle'
+        week.fillStyle = "#858a92"
+        week.fillText "#{hour}:00", hourNumberingCenter, y
+
+        hour++
+
+      minutesSinceMidnight = (new Date() - new Date().setHours(0, 0, 0, 0)) / 1000 * 60
+      minutesSinceMidnight -= (App.config.day_starts_at * 60)
+    
+      now = Math.round(minuteHeight * minutesSinceMidnight + 30 * minuteHeight) + 0.5
       today.beginPath()
       today.strokeStyle = "#FB1500"
       today.moveTo 0, now
-      today.lineTo elWidth, now
+      today.lineTo weekWidth, now
       today.stroke()
 
       today.beginPath()
@@ -424,44 +462,11 @@ Mole.module "Calendar", (Module, App) ->
       today.arc 2, now, 2, 0, Math.PI * 2, true
       today.fill()
 
-      for y in [0..elHeight] by (elHeight / 10)
-
-        y += (elHeight / 10)
-        y = Math.round y
-        y += 0.5
-
-        # strong line
-        day.beginPath()
-        day.strokeStyle = "#d7dde8"
-        day.moveTo 0, y
-        day.lineTo elWidth - 1, y
-        day.stroke()
-
-        # dashed line
-        day.beginPath()
-        day.setLineDash [1, 2]
-        day.strokeStyle = "#d7dde8"
-        day.moveTo 0, Math.round(y - (elHeight / 10) / 2) + 0.5
-        day.lineTo elWidth - 1, Math.round(y - (elHeight / 10) / 2) + 0.5
-        day.stroke()
-
-        day.setLineDash [0, 0]
-
-        if index < 19
-          week.font = '10px sans-serif'
-          week.textAlign = 'center'
-          week.textBaseline = 'middle'
-          week.fillStyle = "#858a92"
-          week.fillText "#{index}:00", hourNumberingCenter, y
-
-        index++
-
-      week.fillStyle = "#FFFFFF"
       # cheap outline above and below
-      week.fillText moment().format("HH:mm"), hourNumberingCenter, now - 1
-      week.fillText moment().format("HH:mm"), hourNumberingCenter, now + 1
-
+      week.strokeStyle = "#FFFFFF"
+      week.lineWidth = 3
       week.fillStyle = "#FB1500"
+      week.strokeText moment().format("HH:mm"), hourNumberingCenter, now
       week.fillText moment().format("HH:mm"), hourNumberingCenter, now
 
   @addInitializer =>
@@ -485,3 +490,5 @@ Mole.module "Calendar", (Module, App) ->
 
     App.user.once     'sync', callback
     App.projects.once 'sync', callback
+
+  @numberOfHours = ->
