@@ -800,10 +800,11 @@ Version: 3.4.6 Timestamp: Sat Mar 22 22:30:15 EDT 2014
 
 .select2-results ul.select2-result-sub > li .select2-result-label {
   padding-left: 20px;
-  .unbillable:after {
+}
+
+.select2-results .unbillable:after, .select2-container .unbillable:after {
     content: "*";
     color: #f00;
-  }
 }
 
 .select2-results ul.select2-result-sub ul.select2-result-sub > li .select2-result-label { padding-left: 40px }
