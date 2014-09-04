@@ -264,6 +264,7 @@ Mole.module "Calendar", (Module, App) ->
     initialize: (attributes) ->
       @collection = attributes.model.get "days"
 
+
   class Week extends Backbone.Model
     initialize: (attributes) ->
       days = new DayCollection attributes.days
@@ -364,7 +365,6 @@ Mole.module "Calendar", (Module, App) ->
         _.delay =>
           @drawLines()
           App.vent.trigger "weekCollection:change:index", @collection.at 0
-          @$el.panelSnap panelSelector: '.week'
 
         , 100
 
@@ -373,9 +373,6 @@ Mole.module "Calendar", (Module, App) ->
         , 10
 
     events:
-      "panelsnap:activate": (event, $target) ->
-        App.vent.trigger "weekCollection:change:index", @collection.at $target.index()
-
       click: (e) ->
         unless $(e.target).hasClass "entry"
           @collection.selected?.deselect()
@@ -391,7 +388,7 @@ Mole.module "Calendar", (Module, App) ->
     drawLines: ->
       [elWidth, elHeight] = [@$el.width(), @$el.height()]
       day   = document.getCSSCanvasContext  '2d', 'day' , elWidth, elHeight
-      week  = document.getCSSCanvasContext  '2d', 'week', elWidth, elHeight
+      week  = document.getCSSCanvasContext  '2d', 'weekList', elWidth, elHeight
       today = document.getCSSCanvasContext  '2d', 'now' , elWidth, elHeight
 
       day.clearRect   0, 0, elWidth, elHeight

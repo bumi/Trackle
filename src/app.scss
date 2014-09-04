@@ -169,12 +169,16 @@ h1, h2, h3, h4, h5, h6 {
   .weeks-list {
     height: 100%;
     width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
     position: relative;
-  }
+    background-image: -webkit-canvas(weekList);
+   }
 
   .week {
     height: 100%;
+    width: 100%;
+    position: relative;
+    float: left
   }
 
   .days-list {

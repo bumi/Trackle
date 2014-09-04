@@ -7,7 +7,13 @@ $ ->
     ignoreAjaxAbort: true
   ).attach()
 
+   $weekList = $(".weeks-list")
+ 
   $weekList = $(".weeks-list")
+
+  $weekList.width($weekList.width() * $weekList.children().length)
+  $('.week').css('width',  (1 / $(".weeks-list").children().length)*100 + "%")
+
 
   minimumMinutes = 15
   maximumMinutes = 480
