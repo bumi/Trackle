@@ -140,13 +140,29 @@ h1, h2, h3, h4, h5, h6 {
 
     .calendar-navigation {
       position: absolute;
-      top: 55px;
-      left: 0;
-      z-index: 9;
+      top: 60px;
+      left: 1%;
+      z-index: 2;
+      text-align: center;
+      width: 8%;
+      color: #82848b;
+      font-size: 14px;
+
+      &:hover {
+        border-radius: 3px;
+        box-shadow: 0 0 0 1px #D7DDE8;
+        .today {
+          box-shadow: -1px 0 0 #D7DDE8, 1px 0 0 #D7DDE8;
+        }
+      }
 
       li {
         display: inline-block;
-        padding: 3px 5px 2px;
+        padding: 1px 0 2px;
+        &.today {
+          padding: 1px 4px 2px;
+          margin: 0 4px;
+        }
       }
     }
 
@@ -191,8 +207,18 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-justify-content: flex-start;
     -webkit-align-content: flex-start;
     -webkit-align-items: flex-start;
-    background-image: -webkit-canvas(week);
 
+    &:before {
+      content: "";
+      width: 10%;
+      height: 100%;
+      background-image: -webkit-canvas(week);
+      background-color: white;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      z-index: 1;
+    }
   }
 
   .week {
