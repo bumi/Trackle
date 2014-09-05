@@ -13,6 +13,17 @@ Mole.module "Header", (Module, App) ->
     itemView: DateItemView
     itemViewContainer: ".calendar-header"
     template: "header/header-view"
+
+    ui:
+      prev: ".calendar-navigation .prev"
+      today: ".calendar-navigation .today"
+      next: ".calendar-navigation .next"
+
+    events:
+      "click @ui.prev":  -> App.vent.trigger "calendar-navigation:prev"
+      "click @ui.today": -> App.vent.trigger "calendar-navigation:today"
+      "click @ui.next":  -> App.vent.trigger "calendar-navigation:next"
+
     modelEvents:
       sync: "render"
 
@@ -25,4 +36,3 @@ Mole.module "Header", (Module, App) ->
 
     App.vent.on "weekCollection:change:index", (week) =>
       @headerView.collection.reset week.get("days").toJSON()
-
