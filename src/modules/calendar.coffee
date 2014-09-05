@@ -15,9 +15,11 @@ Mole.module "Calendar", (Module, App) ->
           App.tracker.event "entry:close:via-key"
 
     template: "entry/edit-view"
+
     modelEvents:
       destroy: -> App.layout.popover.closeDialog()
       change: -> @model.needsSave = true
+
     events:
       "click .remove": (e) ->
         e.preventDefault()
@@ -363,8 +365,7 @@ Mole.module "Calendar", (Module, App) ->
 
         _.delay =>
           @drawLines()
-          App.vent.trigger "weekCollection:change:index", @collection.at 0
-
+          @scrollWeekTo 0
         , 100
 
         App.options.nwWindow.on "resize", _.throttle =>
@@ -378,11 +379,29 @@ Mole.module "Calendar", (Module, App) ->
 
     initialize: ->
       @weekIndex = 0
+      App.vent.on "calendar-navigation:prev",  => @scrollWeekBy 1
+      App.vent.on "calendar-navigation:today", => @scrollWeekTo 0
+      App.vent.on "calendar-navigation:next",  => @scrollWeekBy -1
+
+    scrollWeekBy: (amount) -> @scrollWeekTo @weekIndex + amount
+
+    scrollWeekTo: (index = 0) ->
+      index = if index >= @collection.length then @collection.length-1 else index
+      index = if index < 0 then 0 else index
+
+      weekWidth = @$el.width()
+      fullWidth = weekWidth * @collection.length
+      scrollPosition = fullWidth - (weekWidth * (index + 1))
+      console.log index, weekWidth, fullWidth, scrollPosition
+
+      @$el.stop(false, true).animate {scrollLeft: scrollPosition}, =>
+        @weekIndex = index
+        App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
+
 
     cyclicRedraw: =>
       @drawLines()
       setTimeout @cyclicRedraw, (60 - (new Date()).getSeconds()) * 1000 + 5
-
 
     drawLines: ->
       [elWidth, elHeight] = [@$el.width(), @$el.height()]
