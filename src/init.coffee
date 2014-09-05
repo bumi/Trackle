@@ -6,8 +6,6 @@ $ ->
   Raygun.init('qpf4QU6c4uq/tYwvoegH8A==',
     ignoreAjaxAbort: true
   ).attach()
-
-   $weekList = $(".weeks-list")
  
   $weekList = $(".weeks-list")
 
