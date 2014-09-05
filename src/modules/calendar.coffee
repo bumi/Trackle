@@ -396,14 +396,18 @@ Mole.module "Calendar", (Module, App) ->
       scrollPosition = fullWidth - (weekWidth * (index + 1))
       console.log index, weekWidth, fullWidth, scrollPosition
 
-      if animate
-        @$el.stop(false, true).animate {scrollLeft: scrollPosition}, =>
-          @weekIndex = index
-          App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
+      if fullWidth == scrollPosition + weekWidth
+        $('.weeks-list').animate({ paddingRight: '50px'}, 200, ->
+          $('.weeks-list').animate({ paddingRight: '0px'}, 400)
+        )
       else
-        @$el.prop "scrollLeft", scrollPosition
-        App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
-
+        if animate
+          @$el.stop(false, true).animate {scrollLeft: scrollPosition}, =>
+            @weekIndex = index
+            App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
+        else
+          @$el.prop "scrollLeft", scrollPosition
+          App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
 
     cyclicRedraw: =>
       @drawLines()
