@@ -364,7 +364,6 @@ Mole.module "Calendar", (Module, App) ->
         _.delay =>
           @drawLines()
           App.vent.trigger "weekCollection:change:index", @collection.at 0
-          @$el.panelSnap panelSelector: '.week'
 
         , 100
 
@@ -373,9 +372,6 @@ Mole.module "Calendar", (Module, App) ->
         , 10
 
     events:
-      "panelsnap:activate": (event, $target) ->
-        App.vent.trigger "weekCollection:change:index", @collection.at $target.index()
-
       click: (e) ->
         unless $(e.target).hasClass "entry"
           @collection.selected?.deselect()
