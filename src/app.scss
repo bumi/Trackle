@@ -137,6 +137,36 @@ h1, h2, h3, h4, h5, h6 {
         }
       }
     }
+
+    .calendar-navigation {
+      position: absolute;
+      top: 54px;
+      left: 1%;
+      z-index: 2;
+      text-align: center;
+      width: 8%;
+      min-width: 90px;
+      color: #82848b;
+      font-size: 14px;
+
+      &:hover {
+        border-radius: 3px;
+        box-shadow: 0 0 0 1px #D7DDE8;
+        .today {
+          box-shadow: -1px 0 0 #D7DDE8, 1px 0 0 #D7DDE8;
+        }
+      }
+
+      li {
+        display: inline-block;
+        padding: 1px 0 2px;
+        &.today {
+          padding: 1px 4px 2px;
+          margin: 0 4px;
+        }
+      }
+    }
+
   }
 }
 
@@ -171,10 +201,31 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     overflow-x: hidden;
     position: relative;
+
+    display: -webkit-flex;
+    -webkit-flex-direction: row-reverse;
+    -webkit-flex-wrap: nowrap;
+    -webkit-justify-content: flex-start;
+    -webkit-align-content: flex-start;
+    -webkit-align-items: flex-start;
+
+    &:before {
+      content: "";
+      width: 10%;
+      height: 100%;
+      background-image: -webkit-canvas(week);
+      background-color: white;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      z-index: 1;
+    }
   }
 
   .week {
+    width: 100%;
     height: 100%;
+    -webkit-flex-shrink: 0;
   }
 
   .days-list {
@@ -186,7 +237,6 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-align-content: flex-start;
     -webkit-align-items: flex-start;
     overflow: hidden;
-    background-image: -webkit-canvas(week);
     background-repeat: no-repeat;
     background-position: 0;
     padding-left: 10%;

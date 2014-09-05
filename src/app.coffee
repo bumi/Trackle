@@ -59,6 +59,8 @@ Mole.addInitializer (@options) ->
   if @storage.exist "window:position"
     @options.nwWindow.moveTo.apply @options.nwWindow, @storage.get "window:position"
 
+  @vent.on "all", (event) -> console.info "DEBUG: #{event}"
+
   @vent.on "api:ready", =>
     @user.fetch()
     @projects.fetch()
