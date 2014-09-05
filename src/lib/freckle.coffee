@@ -70,9 +70,11 @@ class Freckle
                 "Content-Type": "application/json"
                 "X-FreckleToken": parent.options.token
 
+              console.time storageKey
               request[requestCargo] payload
 
               request.end (response) ->
+                console.timeEnd storageKey
                 console.log requestMethod, payload, url
                 storage.set "#{storageKey}:response", response.body
                 storage.set "#{storageKey}:timestamp", Date.now()

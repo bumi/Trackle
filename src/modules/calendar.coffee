@@ -344,16 +344,6 @@ Mole.module "Calendar", (Module, App) ->
             selected.destroy()
             selected.deselect()
             App.tracker.event "entry:remove:via-key"
-        # enter: ->
-        #   selected = @collection.selected
-        #   if selected?
-        #     selected.trigger "edit"
-        #   else
-        #     currentWeek = @currentWeek()
-        #     if currentWeek?
-        #       today = currentWeek.get("days").today()
-        #       entries = today.get "entries"
-        #       entries.addEntry()
 
     currentWeek: ->
       @collection.at(@weekIndex) || null
@@ -485,3 +475,15 @@ Mole.module "Calendar", (Module, App) ->
 
     App.user.once     'sync', callback
     App.projects.once 'sync', callback
+
+    App.vent.on "menu:new-entry", =>
+      currentWeek = @weekCollectionView.currentWeek()
+      if currentWeek?
+        today = currentWeek.get("days").today()
+        entries = today.get "entries"
+        entries.addEntry()
+
+    App.vent.on "menu:edit-entry", =>
+      selected = @weekCollectionView.collection.selected
+      if selected?
+        selected.trigger "edit"

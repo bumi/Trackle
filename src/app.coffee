@@ -59,6 +59,8 @@ Mole.addInitializer (@options) ->
   if @storage.exist "window:position"
     @options.nwWindow.moveTo.apply @options.nwWindow, @storage.get "window:position"
 
+  @vent.on "all", (event) -> console.info "DEBUG: #{event}"
+
   @vent.on "api:ready", =>
     @user.fetch()
     @projects.fetch()
@@ -84,21 +86,3 @@ Mole.addInitializer (@options) ->
     @projects.recents.sort()
 
   @Authentication.start()
-
-
-  # Add a simple Menue with logout Button
-  win = gui.Window.get()
-  menubar = new gui.Menu({ type: 'menubar' })
-  sub1 = new gui.Menu()
-
-  sub1.append(new gui.MenuItem(
-    label: 'Logout',
-    click: ->
-      Mole.storage.clear()
-      Mole.Authentication.stop()
-      Mole.Authentication.start()
-      @layout.render()
-  ))
-
-  menubar.append(new gui.MenuItem({ label: 'Menue', submenu: sub1}))
-  win.menu = menubar
