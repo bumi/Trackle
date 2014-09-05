@@ -388,19 +388,17 @@ Mole.module "Calendar", (Module, App) ->
     scrollWeekBy: (amount) -> @scrollWeekTo @weekIndex + amount
 
     scrollWeekTo: (index = 0, animate = true) ->
-      index = if index >= @collection.length then @collection.length-1 else index
-      index = if index < 0 then 0 else index
-
-      weekWidth = @$el.width()
-      fullWidth = weekWidth * @collection.length
-      scrollPosition = fullWidth - (weekWidth * (index + 1))
-      console.log index, weekWidth, fullWidth, scrollPosition
-
-      if fullWidth == scrollPosition + weekWidth
-        $('.weeks-list').animate({ paddingRight: '50px'}, 200, ->
-          $('.weeks-list').animate({ paddingRight: '0px'}, 400)
-        )
+      if index < 0
+        $('.weeks-list').animate { paddingRight: '50px'}, 100, ->
+          $('.weeks-list').animate { paddingRight: '0px'}, 200
       else
+        index = if index >= @collection.length then @collection.length-1 else index
+        
+        weekWidth = @$el.width()
+        fullWidth = weekWidth * @collection.length
+        scrollPosition = fullWidth - (weekWidth * (index + 1))
+        console.log index, weekWidth, fullWidth, scrollPosition
+          
         if animate
           @$el.stop(false, true).animate {scrollLeft: scrollPosition}, =>
             @weekIndex = index
