@@ -9,14 +9,14 @@ class Storage
 
   set: (key, value) ->
     value = if typeof value isnt String
-      JSON.stringify value
+      try JSON.stringify value
 
     @log "set", key
     @store.setItem key, value
 
   get: (key) ->
     @log "get", key
-    JSON.parse @store.getItem key
+    try JSON.parse @store.getItem key
 
   remove: (key) ->
     @store.removeItem key

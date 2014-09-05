@@ -46,6 +46,13 @@ Mole.module "Authentication", (Module, App) ->
 # -----------------------------------------------------------------------
 
   @addInitializer =>
+
+    App.vent.on "menu:logout", ->
+      Mole.storage.clear()
+      App.Calendar.weekCollection.set [{ days: [{}, {}, {}, {}, {}, {}, {}] }]
+      Mole.Authentication.stop()
+      Mole.Authentication.start()
+
     @freckle = new Freckle
 
     @freckle.on "ready", =>
