@@ -97,7 +97,6 @@ module.exports = (grunt) ->
             "vendor/moment-range.js"
             "vendor/drop.js"
             "vendor/select2.js"
-            "vendor/jquery.panelSnap.js"
             "vendor/raygun.min.js"
             "vendor/md5.js"
           ]

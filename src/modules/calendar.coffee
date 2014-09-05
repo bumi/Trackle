@@ -15,9 +15,11 @@ Mole.module "Calendar", (Module, App) ->
           App.tracker.event "entry:close:via-key"
 
     template: "entry/edit-view"
+
     modelEvents:
       destroy: -> App.layout.popover.closeDialog()
       change: -> @model.needsSave = true
+
     events:
       "click .remove": (e) ->
         e.preventDefault()
@@ -353,30 +355,51 @@ Mole.module "Calendar", (Module, App) ->
 
         _.delay =>
           @drawLines()
-          App.vent.trigger "weekCollection:change:index", @collection.at 0
-          @$el.panelSnap panelSelector: '.week'
-
+          @scrollWeekTo 0, false
         , 100
 
         App.options.nwWindow.on "resize", _.throttle =>
           @drawLines()
         , 10
 
-    events:
-      "panelsnap:activate": (event, $target) ->
-        App.vent.trigger "weekCollection:change:index", @collection.at $target.index()
+        App.options.nwWindow.on "resize", => @scrollWeekTo @weekIndex, false
 
+    events:
       click: (e) ->
         unless $(e.target).hasClass "entry"
           @collection.selected?.deselect()
 
     initialize: ->
       @weekIndex = 0
+      App.vent.on "calendar-navigation:prev",  => @scrollWeekBy 1
+      App.vent.on "calendar-navigation:today", => @scrollWeekTo 0
+      App.vent.on "calendar-navigation:next",  => @scrollWeekBy -1
+
+    scrollWeekBy: (amount) -> @scrollWeekTo @weekIndex + amount
+
+    scrollWeekTo: (index = 0, animate = true) ->
+      if index < 0
+        $('.weeks-list').animate { paddingRight: '50px'}, 100, ->
+          $('.weeks-list').animate { paddingRight: '0px'}, 200
+      else
+        index = if index >= @collection.length then @collection.length-1 else index
+        
+        weekWidth = @$el.width()
+        fullWidth = weekWidth * @collection.length
+        scrollPosition = fullWidth - (weekWidth * (index + 1))
+        console.log index, weekWidth, fullWidth, scrollPosition
+          
+        if animate
+          @$el.stop(false, true).animate {scrollLeft: scrollPosition}, =>
+            @weekIndex = index
+            App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
+        else
+          @$el.prop "scrollLeft", scrollPosition
+          App.vent.trigger "weekCollection:change:index", @collection.at @weekIndex
 
     cyclicRedraw: =>
       @drawLines()
       setTimeout @cyclicRedraw, (60 - (new Date()).getSeconds()) * 1000 + 5
-
 
     drawLines: ->
       [elWidth, elHeight] = [@$el.width(), @$el.height()]
